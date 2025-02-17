@@ -10,7 +10,7 @@ points = {
     "NETFLIX":25,
     "ZOMATO":15,
     "SPOTIFY":15,
-    "GITHUB": 10
+    "GITHUB": 10,
     "TWITTER":10,
 }
 
