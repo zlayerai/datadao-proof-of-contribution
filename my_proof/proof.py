@@ -54,14 +54,10 @@ class Proof:
                 self.proof_response_object['quality'] = final_scores['quality_score']
                 self.proof_response_object['authenticity'] = final_scores['authenticity_score']
                 self.proof_response_object['score'] = final_scores['score']
+                self.proof_response_object['attributes'] = final_scores['attributes']
 
                 if self.proof_response_object['authenticity'] < 1.0:
                     self.proof_response_object['valid'] = False
-
-                # self.proof_response_object['attributes'] = {
-                #     # 'normalizedContributionScore': contribution_score_result['normalized_dynamic_score'],
-                #     # 'totalContributionScore': contribution_score_result['total_dynamic_score'],
-                # }
 
         logging.info(f"Proof response: {self.proof_response_object}")
         return self.proof_response_object
@@ -134,8 +130,8 @@ class Proof:
             
             authenticity_scores[task_type] = auth_score
         
-        # Combine scores
         final_scores = {}
+        attributes = {}
         for task_type in type_scores.keys():
             final_scores[task_type] = {
                 "type_points": type_scores[task_type]["type_points"],
@@ -143,19 +139,14 @@ class Proof:
                 "uniqueness_score": type_scores[task_type]["type_uniqueness_score"],
                 "authenticity_score": authenticity_scores.get(task_type, 0),
                 "ownership_score": self.proof_response_object['ownership'],
-                "individual_score": (type_scores[task_type]["type_quality_score"] + type_scores[task_type]["type_uniqueness_score"] + authenticity_scores.get(task_type, 0) + self.proof_response_object['ownership']) / 4
             }
+            attributes[task_type] = {"type_points": type_scores[task_type]["type_points"]}
         
-        # return average uniqueness score, quality score, authenticity score, and ownership score
         return {
             "uniqueness_score": sum(score["uniqueness_score"] for score in final_scores.values()) / len(final_scores),
             "quality_score": sum(score["quality_score"] for score in final_scores.values()) / len(final_scores),
             "authenticity_score": sum(score["authenticity_score"] for score in final_scores.values()) / len(final_scores),
             "ownership_score": sum(score["ownership_score"] for score in final_scores.values()) / len(final_scores),
-            "score": sum(score["type_points"] for score in final_scores.values()) / calculate_max_points(points)
+            "score": sum(score["type_points"] for score in final_scores.values()) / calculate_max_points(points),
+            "attributes": attributes
         }
-
-
-        # final_score = sum(score["individual_score"] for score in final_scores.values()) / len(final_scores)
-        # logging.info(f"Final Individual Scores: {final_scores}")
-        # return final_score
