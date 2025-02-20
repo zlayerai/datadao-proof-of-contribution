@@ -54,7 +54,7 @@ class Proof:
                 self.proof_response_object['quality'] = final_scores['quality_score']
                 self.proof_response_object['authenticity'] = final_scores['authenticity_score']
                 self.proof_response_object['score'] = final_scores['score']
-                self.proof_response_object['attributes'] = final_scores['attributes']
+                self.proof_response_object['metadata'] = final_scores['metadata']
 
                 if self.proof_response_object['authenticity'] < 1.0:
                     self.proof_response_object['valid'] = False
@@ -131,7 +131,7 @@ class Proof:
             authenticity_scores[task_type] = auth_score
         
         final_scores = {}
-        attributes = {}
+        metadata = {}
         for task_type in type_scores.keys():
             final_scores[task_type] = {
                 "type_points": type_scores[task_type]["type_points"],
@@ -140,7 +140,7 @@ class Proof:
                 "authenticity_score": authenticity_scores.get(task_type, 0),
                 "ownership_score": self.proof_response_object['ownership'],
             }
-            attributes[task_type] = {"type_points": type_scores[task_type]["type_points"]}
+            metadata[task_type] = {"type_points": type_scores[task_type]["type_points"]}
         
         return {
             "uniqueness_score": sum(score["uniqueness_score"] for score in final_scores.values()) / len(final_scores),
@@ -148,5 +148,5 @@ class Proof:
             "authenticity_score": sum(score["authenticity_score"] for score in final_scores.values()) / len(final_scores),
             "ownership_score": sum(score["ownership_score"] for score in final_scores.values()) / len(final_scores),
             "score": sum(score["type_points"] for score in final_scores.values()) / calculate_max_points(points),
-            "attributes": attributes
+            "metadata": metadata
         }
