@@ -131,17 +131,38 @@ class Proof:
             authenticity_scores[task_type] = auth_score
         
         final_scores = {}
-        metadata = {}
+        metadata = {
+            "submission_time": datetime.now(timezone.utc).isoformat(),
+            "total_tokens": 0,
+            "types": list(type_scores.keys()),
+            "platform_rewards": {},
+        }
+
         for task_type in type_scores.keys():
+            ownership_score = self.proof_response_object['ownership']
+            uniqueness_score = type_scores[task_type]["type_uniqueness_score"]
+            quality_score = type_scores[task_type]["type_quality_score"]
+            authenticity_score = authenticity_scores.get(task_type, 0)
+            type_points = type_scores[task_type]["type_points"]
+
             final_scores[task_type] = {
-                "type_points": type_scores[task_type]["type_points"],
-                "quality_score": type_scores[task_type]["type_quality_score"],
-                "uniqueness_score": type_scores[task_type]["type_uniqueness_score"],
-                "authenticity_score": authenticity_scores.get(task_type, 0),
-                "ownership_score": self.proof_response_object['ownership'],
+                "type_points": type_points,
+                "quality_score": quality_score,
+                "uniqueness_score": uniqueness_score,
+                "authenticity_score": authenticity_score,
+                "ownership_score": ownership_score,
             }
-            metadata[task_type] = {"type_points": type_scores[task_type]["type_points"]}
-        
+
+            metadata["total_tokens"] += type_points
+            metadata["platform_rewards"][task_type] = {
+                "token_reward": type_points,
+                "uniqueness": uniqueness_score,
+                "ownership": ownership_score,
+                "authenticity": authenticity_score,
+                "quality": quality_score,
+                "score": (uniqueness_score + quality_score + ownership_score + authenticity_score) / 4,
+            }
+
         return {
             "uniqueness_score": sum(score["uniqueness_score"] for score in final_scores.values()) / len(final_scores),
             "quality_score": sum(score["quality_score"] for score in final_scores.values()) / len(final_scores),
