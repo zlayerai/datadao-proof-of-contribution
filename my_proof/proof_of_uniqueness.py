@@ -14,11 +14,17 @@ from datetime import datetime, timedelta, timezone
 # Connect to Redis
 def get_redis_client():
     try:
+        redis_host = os.environ.get('REDIS_HOST', 'localhost')
+        redis_port = int(os.environ.get('REDIS_PORT', 6379))
+        redis_username = os.environ.get('REDIS_USERNAME', '')
+        redis_password = os.environ.get('REDIS_PWD', 'password')
+        
         redis_client = redis.StrictRedis(
-            host= os.environ.get('REDIS_HOST', None),
-            port= os.environ.get('REDIS_PORT', 0),
-            db=0,
-            password= os.environ.get('REDIS_PWD', ""),
+            host=redis_host,
+            port=redis_port,
+            username=redis_username,
+            password=redis_password,
+            ssl=True,
             decode_responses=True,
             socket_timeout=30,
             retry_on_timeout=True
@@ -27,6 +33,7 @@ def get_redis_client():
         redis_client.ping()
         return redis_client
     except redis.ConnectionError:
+        logging.warning("Redis connection failed. Proceeding without caching.")
         return None
 
 def hash_value(value):
