@@ -30,7 +30,7 @@ def load_config() -> Dict[str, Any]:
         'redis_port': os.environ.get('REDIS_PORT', None),
         'redis_host': os.environ.get('REDIS_HOST', None),
         'redis_pwd': os.environ.get('REDIS_PWD', None),
-        'redis_username': os.environ.get('REDIS_USERNAME', '')
+        'redis_username': os.environ.get('REDIS_USERNAME', ''),
         'use_sealing': os.path.isdir(SEALED_DIR)
     }
     logging.info(f"Using config: {json.dumps(config, indent=2)}")
